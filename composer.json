@@ -6,7 +6,7 @@
         },
         "testing-framework": {
             "type": "vcs",
-            "url": "https://github.com/helhum/TYPO3-testing-framework.git"
+            "url": "https://github.com/bnf/nimut-testing-framework.git"
         }
     },
     "name": "helhum/typo3-console",
@@ -58,7 +58,7 @@
         "typo3-console/create-reference-command": "@dev",
         "typo3-console/php-server-command": "^0.2",
         "symfony/filesystem": "^3.2",
-        "nimut/testing-framework": "dev-allow-php73",
+        "nimut/testing-framework": "v10.x-dev",
         "cweagans/composer-patches": "^1.6",
         "jakub-onderka/php-parallel-lint": "^1.0"
     },
