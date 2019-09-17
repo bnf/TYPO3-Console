@@ -15,6 +15,7 @@ namespace Helhum\Typo3Console\Install;
  */
 
 use Helhum\Typo3Console\Package\UncachedPackageManager;
+use TYPO3\CMS\Core\Package\FailsafePackageManager;
 use TYPO3\CMS\Core\Package\PackageInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
@@ -34,7 +35,7 @@ class PackageStatesGenerator
      *
      * @param UncachedPackageManager $packageManager
      */
-    public function __construct(UncachedPackageManager $packageManager)
+    public function __construct($packageManager)
     {
         $this->packageManager = $packageManager;
     }

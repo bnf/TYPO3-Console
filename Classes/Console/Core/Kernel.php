@@ -24,6 +24,7 @@ use Helhum\Typo3Console\Exception;
 use Helhum\Typo3Console\Mvc\Cli\CommandCollection;
 use Helhum\Typo3Console\Mvc\Cli\CommandConfiguration;
 use Helhum\Typo3Console\Mvc\Cli\Symfony\Application;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -41,9 +42,19 @@ class Kernel
     private $bootstrap;
 
     /**
+     * @var CompatibilityClassLoader
+     */
+    private $classLoader;
+
+    /**
      * @var RunLevel
      */
     private $runLevel;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * @var bool
@@ -53,11 +64,8 @@ class Kernel
     public function __construct(CompatibilityClassLoader $classLoader)
     {
         $this->ensureRequiredEnvironment();
-        $this->bootstrap = Bootstrap::getInstance();
-        $this->bootstrap->initializeClassLoader($classLoader->getTypo3ClassLoader());
-        // Initialize basic annotation loader until TYPO3 does so as well
-        AnnotationRegistry::registerLoader('class_exists');
-        $this->runLevel = new RunLevel($this->bootstrap);
+        $this->classLoader = $classLoader;
+        $this->runLevel = new RunLevel();
     }
 
     /**
@@ -100,7 +108,15 @@ class Kernel
     public function initialize(string $runLevel = null)
     {
         if (!$this->initialized) {
-            Scripts::baseSetup($this->bootstrap);
+            // Initialize basic annotation loader until TYPO3 does so as well
+            AnnotationRegistry::registerLoader('class_exists');
+//            $this->runLevel = new RunLevel($this->bootstrap);
+            Scripts::baseSetup();
+            $this->container = Bootstrap::init(
+                $this->classLoader->getTypo3ClassLoader(),
+                true,
+                false
+            );
             $this->initialized = true;
         }
         if ($runLevel !== null) {
@@ -122,7 +138,7 @@ class Kernel
 
         $commandCollection = new CommandCollection(
             $this->runLevel,
-            new CommandConfiguration(GeneralUtility::makeInstance(PackageManager::class))
+            new CommandConfiguration($this->container->get(PackageManager::class))
         );
 
         $application = new Application($this->runLevel, CompatibilityScripts::isComposerMode());

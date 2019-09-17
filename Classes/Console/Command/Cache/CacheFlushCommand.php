@@ -24,6 +24,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use TYPO3\CMS\Core\Authentication\CommandLineUserAuthentication;
+use TYPO3\CMS\Core\Core\Bootstrap;
 
 class CacheFlushCommand extends AbstractConvertedCommand
 {
@@ -63,7 +65,7 @@ EOH
         $io = new SymfonyStyle($input, $output);
 
         $lowLevelCleaner = new CacheLowLevelCleaner();
-        $lowLevelCleaner->forceFlushCachesFiles();
+//        $lowLevelCleaner->forceFlushCachesFiles();
         if ($filesOnly) {
             $io->writeln('Flushed all file caches.');
             // No need to proceed, as files only flush is requested
@@ -71,7 +73,15 @@ EOH
         }
 
         $lowLevelCleaner->forceFlushDatabaseCacheTables();
-        $application->boot(RunLevel::LEVEL_FULL);
+        // Use bootstrap to load all ext_localconf and ext_tables
+        Bootstrap::loadTypo3LoadedExtAndExtLocalconf(false);
+        Bootstrap::unsetReservedGlobalVariables();
+        Bootstrap::loadBaseTca(false);
+        Bootstrap::loadExtTables(false);
+        Bootstrap::initializeBackendUser(CommandLineUserAuthentication::class);
+        Bootstrap::initializeBackendAuthentication();
+        // Global language object on CLI? rly? but seems to be needed by some scheduler tasks :(
+        Bootstrap::initializeLanguageObject();
 
         $cacheService = new CacheService();
         $cacheService->flush();

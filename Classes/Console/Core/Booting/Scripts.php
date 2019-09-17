@@ -21,7 +21,9 @@ use Symfony\Component\Console\Exception\RuntimeException;
 use TYPO3\CMS\Core\Authentication\CommandLineUserAuthentication;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Core\Bootstrap;
+use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Package\PackageManager;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Property\TypeConverter\BooleanConverter;
@@ -48,20 +50,18 @@ class Scripts
         CompatibilityScripts::initializeConfigurationManagement($bootstrap);
     }
 
-    public static function baseSetup(Bootstrap $bootstrap)
+    public static function baseSetup()
     {
         define('TYPO3_MODE', 'BE');
         define('PATH_site', \TYPO3\CMS\Core\Utility\GeneralUtility::fixWindowsFilePath(getenv('TYPO3_PATH_ROOT')) . '/');
         define('PATH_thisScript', PATH_site . 'typo3/index.php');
 
-        $bootstrap->setRequestType(TYPO3_REQUESTTYPE_BE | TYPO3_REQUESTTYPE_CLI);
-        $bootstrap->baseSetup();
         // Mute notices
         error_reporting(E_ALL & ~E_NOTICE);
         $exceptionHandler = new ExceptionHandler();
         set_exception_handler([$exceptionHandler, 'handleException']);
 
-        self::initializePackageManagement($bootstrap);
+        \TYPO3\CMS\Core\Core\SystemEnvironmentBuilder::run(4, \TYPO3\CMS\Core\Core\SystemEnvironmentBuilder::REQUESTTYPE_CLI);
     }
 
     /**
@@ -113,47 +113,41 @@ class Scripts
         $bootstrap->setEarlyInstance(CacheManager::class, $cacheManager);
     }
 
-    /**
-     * @param Bootstrap $bootstrap
-     */
-    public static function initializeExtensionConfiguration(Bootstrap $bootstrap)
+    public static function initializeExtensionConfiguration()
     {
-        CompatibilityScripts::initializeExtensionConfiguration($bootstrap);
-        ExtensionManagementUtility::loadExtLocalconf();
-        $bootstrap->setFinalCachingFrameworkCacheConfiguration();
-        $bootstrap->unsetReservedGlobalVariables();
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        $assetsCache = $cacheManager->getCache('assets');
+        $coreCache = $cacheManager->getCache('cache_core');
+        IconRegistry::setCache($assetsCache);
+            PageRenderer::setCache($assetsCache);
+            Bootstrap::loadTypo3LoadedExtAndExtLocalconf(true, $coreCache);
+            Bootstrap::setFinalCachingFrameworkCacheConfiguration($cacheManager);
+            Bootstrap::unsetReservedGlobalVariables();
+
+            //        CompatibilityScripts::initializeExtensionConfiguration($bootstrap);
+//        ExtensionManagementUtility::loadExtLocalconf();
+//        $bootstrap->setFinalCachingFrameworkCacheConfiguration();
+//        $bootstrap->unsetReservedGlobalVariables();
     }
 
     public static function initializePersistence()
     {
-        ExtensionManagementUtility::loadBaseTca();
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        $coreCache = $cacheManager->getCache('cache_core');
+        Bootstrap::loadBaseTca(true, $coreCache);
+        Bootstrap::checkEncryptionKey();
     }
 
     /**
      * @param Bootstrap $bootstrap
      */
-    public static function initializeAuthenticatedOperations(Bootstrap $bootstrap)
+    public static function initializeAuthenticatedOperations()
     {
-        $bootstrap->loadExtTables();
-        $bootstrap->initializeBackendUser(CommandLineUserAuthentication::class);
-        self::loadCommandLineBackendUser();
+        Bootstrap::loadExtTables();
+        Bootstrap::initializeBackendUser(CommandLineUserAuthentication::class);
+        Bootstrap::initializeBackendAuthentication();
         // Global language object on CLI? rly? but seems to be needed by some scheduler tasks :(
-        $bootstrap->initializeLanguageObject();
-    }
-
-    /**
-     * If the backend script is in CLI mode, it will try to load a backend user named _cli_lowlevel
-     *
-     * @throws RuntimeException if a non-admin Backend user could not be loaded
-     */
-    private static function loadCommandLineBackendUser()
-    {
-        /** @var CommandLineUserAuthentication $backendUser */
-        $backendUser = $GLOBALS['BE_USER'];
-        if ($backendUser->user['uid']) {
-            throw new RuntimeException('Another user was already loaded which is impossible in CLI mode!', 3);
-        }
-        $backendUser->authenticate();
+        Bootstrap::initializeLanguageObject();
     }
 
     /**
@@ -169,11 +163,17 @@ class Scripts
         if (empty($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'])) {
             $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'] = [];
         }
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = ArrayConverter::class;
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = StringConverter::class;
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = BooleanConverter::class;
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = IntegerConverter::class;
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = FloatConverter::class;
+        self::addTypeConverter(ArrayConverter::class);
+        self::addTypeConverter(StringConverter::class);
+        self::addTypeConverter(BooleanConverter::class);
+        self::addTypeConverter(IntegerConverter::class);
+        self::addTypeConverter(FloatConverter::class);
+    }
+
+    private static function addTypeConverter(string $class) {
+        if (!in_array($class, $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'], true)) {
+            $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['typeConverters'][] = $class;
+        }
     }
 
     /**

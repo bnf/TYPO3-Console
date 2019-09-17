@@ -39,7 +39,7 @@ class ExtensionFactory extends DefaultFactory
      *
      * @param UncachedPackageManager $packageManager
      */
-    public function __construct(UncachedPackageManager $packageManager)
+    public function __construct($packageManager)
     {
         $this->packageManager = $packageManager;
     }
@@ -87,7 +87,7 @@ class ExtensionFactory extends DefaultFactory
     {
         $structureBase = [];
         foreach ($packages as $package) {
-            $extensionConfiguration = $this->packageManager->getExtensionConfiguration($package);
+            $extensionConfiguration = $this->packageManager->getExtensionEmConf($package->getPackagePath());
 
             if (isset($extensionConfiguration['uploadfolder']) && (bool)$extensionConfiguration['uploadfolder']) {
                 $structureBase[] = $this->getExtensionUploadDirectory($package->getPackageKey());

@@ -44,11 +44,6 @@ class RunLevel
      */
     private $error;
 
-    public function __construct(Bootstrap $bootstrap)
-    {
-        $this->bootstrap = $bootstrap;
-    }
-
     /**
      * @param string $commandIdentifier
      * @param string $runLevel
@@ -94,7 +89,7 @@ class RunLevel
     {
         $sequence = $this->buildSequenceForCommand($commandIdentifier);
         try {
-            $sequence->invoke($this->bootstrap);
+            $sequence->invoke();
         } catch (StepFailedException $e) {
             $failedStep = $e->getFailedStep();
             if ($this->isLowLevelStep($failedStep)) {
@@ -264,7 +259,9 @@ class RunLevel
             // Part of essential sequence
             case 'helhum.typo3console:coreconfiguration':
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_ESSENTIAL;
-                $sequence->addStep(new Step($stepIdentifier, [Scripts::class, 'initializeConfigurationManagement']));
+                $sequence->addStep(new Step($stepIdentifier, function () {
+                    // Don't do anything again, step has been executed already
+                }));
                 break;
             case 'helhum.typo3console:providecleanclassimplementations':
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_ESSENTIAL;
@@ -272,11 +269,15 @@ class RunLevel
                 break;
             case 'helhum.typo3console:disabledcaching':
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_ESSENTIAL;
-                $sequence->addStep(new Step($stepIdentifier, [Scripts::class, 'initializeDisabledCaching']), 'helhum.typo3console:coreconfiguration');
+                $sequence->addStep(new Step($stepIdentifier, function () {
+                    // Don't do anything again, step has been executed already
+                }));
                 break;
             case 'helhum.typo3console:errorhandling':
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_ESSENTIAL;
-                $sequence->addStep(new Step($stepIdentifier, [Scripts::class, 'initializeErrorHandling']));
+                $sequence->addStep(new Step($stepIdentifier, function () {
+                    // Don't do anything again, step has been executed already
+                }));
                 break;
 
             // Part of basic runtime
@@ -288,14 +289,16 @@ class RunLevel
             // Part of full runtime
             case 'helhum.typo3console:caching':
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_FULL;
-                unset($this->executedSteps['helhum.typo3console:disabledcaching']);
-                $sequence->removeStep('helhum.typo3console:disabledcaching');
-                $sequence->addStep(new Step($stepIdentifier, [Scripts::class, 'initializeCaching']), 'helhum.typo3console:coreconfiguration');
+                $sequence->addStep(new Step($stepIdentifier, function () {
+                    // Don't do anything again, step has been executed already
+                }));
                 break;
             case 'helhum.typo3console:database':
                 // @deprecated can be removed if TYPO3 8 support is removed
                 $this->executedSteps[$stepIdentifier] = self::LEVEL_FULL;
-                $sequence->addStep(new Step($stepIdentifier, [CompatibilityScripts::class, 'initializeDatabaseConnection']), 'helhum.typo3console:errorhandling');
+                $sequence->addStep(new Step($stepIdentifier, function () {
+                    // Don't do anything again, step has been executed already
+                }));
                 break;
             case 'helhum.typo3console:persistence':
                 $sequence->addStep(new Step($stepIdentifier, [Scripts::class, 'initializePersistence']), 'helhum.typo3console:extensionconfiguration');
