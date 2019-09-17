@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Helhum\Typo3Console\Mvc\Cli;
+namespace Helhum\Typo3Console\TYPO3v95\Mvc\Cli;
 
 /*
  * This file is part of the TYPO3 Console project.
@@ -16,7 +16,6 @@ namespace Helhum\Typo3Console\Mvc\Cli;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Reflection\ClassSchema\Method;
 use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 
 /**
@@ -25,7 +24,7 @@ use TYPO3\CMS\Extbase\Reflection\ReflectionService;
 class CommandReflection
 {
     /**
-     * @var Method
+     * @var array
      */
     private $methodProperties;
 
@@ -37,35 +36,17 @@ class CommandReflection
 
     public function getDescription(): string
     {
-        return '';
+        var_dump($this->methodProperties);
+        return $this->methodProperties['description'] ?? '';
     }
 
     public function getParameters(): array
     {
-        $params_ = $this->methodProperties->getParameters();
-        $params = [];
-
-        foreach ($params_ as $key => $param) {
-            $params[$key] =  [
-                'type' => $param->getType(),
-                'defaultValue' => $param->getDefaultValue(),
-
-                'private'     => false,
-                'protected'   => true,
-                'public'      => true,
-                'static'      => false,
-                //'type'        => null, // Extbase
-                //'elementType' => null, // Extbase
-                'annotations' => [],
-                'tags'        => [],
-                'validators'  => []
-            ];
-        }
-        return $params;
+        return $this->methodProperties['params'] ?? [];
     }
 
     public function getTagsValues(): array
     {
-        return [];
+        return $this->methodProperties['tags'] ?? [];
     }
 }
