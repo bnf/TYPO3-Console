@@ -39,11 +39,12 @@ class CacheServiceTest extends UnitTestCase
      */
     public function cacheGroupsAreRetrievedCorrectlyFromConfiguration()
     {
+        $cachePrefix = class_exists('TYPO3\\CMS\\Core\\DependencyInjection\\ContainerBuilder') ? '' : 'cache_';
         $this->createCacheServiceWithConfiguration(
             [
-                'cache_foo' => ['groups' => ['first', 'second']],
-                'cache_bar' => ['groups' => ['third', 'second']],
-                'cache_baz' => ['groups' => ['first', 'third']],
+                $cachePrefix . 'foo' => ['groups' => ['first', 'second']],
+                $cachePrefix . 'bar' => ['groups' => ['third', 'second']],
+                $cachePrefix . 'baz' => ['groups' => ['first', 'third']],
             ]
         );
 
@@ -62,11 +63,12 @@ class CacheServiceTest extends UnitTestCase
      */
     public function flushByGroupThrowsExceptionForInvalidGroups()
     {
+        $cachePrefix = class_exists('TYPO3\\CMS\\Core\\DependencyInjection\\ContainerBuilder') ? '' : 'cache_';
         $this->createCacheServiceWithConfiguration(
             [
-                'cache_foo' => ['groups' => ['first', 'second']],
-                'cache_bar' => ['groups' => ['third', 'second']],
-                'cache_baz' => ['groups' => ['first', 'third']],
+                $cachePrefix . 'foo' => ['groups' => ['first', 'second']],
+                $cachePrefix . 'bar' => ['groups' => ['third', 'second']],
+                $cachePrefix . 'baz' => ['groups' => ['first', 'third']],
             ]
         );
 

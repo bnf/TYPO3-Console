@@ -34,7 +34,8 @@ class UncachedPackageManager extends PackageManager
         $this->packageStatesFileExists = @file_exists($this->packageStatesPathAndFilename);
         $this->loadPackageStates();
         $this->initializePackageObjects();
-        $this->initializeCompatibilityLoadedExtArray();
+        // For TYPO3 <= v9
+        is_callable([$this, 'initializeCompatibilityLoadedExtArray']) && $this->initializeCompatibilityLoadedExtArray();
     }
 
     protected function loadPackageStates()

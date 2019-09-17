@@ -67,6 +67,7 @@
         "friendsoftypo3/dbal": "*"
     },
     "autoload": {
+        "files": ["class_aliases.php"],
         "psr-4": {
             "Helhum\\Typo3Console\\": [
                 "Classes/Console/",
