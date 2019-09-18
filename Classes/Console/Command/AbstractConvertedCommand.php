@@ -65,8 +65,8 @@ abstract class AbstractConvertedCommand extends Command
                 continue;
             }
             if ($deprecatedValue = $input->getOption($dashedName)) {
-                $messages[] = '<warning>Using named arguments is deprecated.</warning>';
-                $messages[] = sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $casedName, $dashedName);
+                //$messages[] = '<warning>Using named arguments is deprecated.</warning>';
+                //$messages[] = sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $casedName, $dashedName);
                 $input->setArgument($casedName, $deprecatedValue);
             }
         }
@@ -77,10 +77,10 @@ abstract class AbstractConvertedCommand extends Command
                 continue;
             }
             if ($deprecatedValue = $input->getArgument($casedName)) {
-                $messages[] = '<warning>Using named arguments is deprecated.</warning>';
-                $messages[] = sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $casedName, $dashedName);
-                $messages[] = '<warning>Specifying argument values for options is deprecated.</warning>';
-                $messages[] = sprintf('<warning>Gracefully setting option "%s" to "%s".</warning>', $dashedName, $deprecatedValue);
+                //$messages[] = '<warning>Using named arguments is deprecated.</warning>';
+                //$messages[] = sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $casedName, $dashedName);
+                //$messages[] = '<warning>Specifying argument values for options is deprecated.</warning>';
+                //$messages[] = sprintf('<warning>Gracefully setting option "%s" to "%s".</warning>', $dashedName, $deprecatedValue);
                 $input->setOption($dashedName, $deprecatedValue);
             }
         }

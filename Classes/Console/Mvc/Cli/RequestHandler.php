@@ -67,8 +67,8 @@ class RequestHandler
                 $request->setArgument($argument->getName(), $input->getArgument($argumentName));
             }
             if ($input->hasGivenOption($argument->getOptionName())) {
-                $output->writeln('<warning>Using named arguments is deprecated.</warning>');
-                $output->writeln(sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $argument->getName(), $argument->getDashedName()));
+                //$output->writeln('<warning>Using named arguments is deprecated.</warning>');
+                //$output->writeln(sprintf('<warning>Gracefully setting argument "%s" for given option "%s".</warning>', $argument->getName(), $argument->getDashedName()));
                 $request->setArgument($argument->getName(), $input->getOption($argument->getOptionName()));
             }
             $argumentName .= '_' . $commandDefinition->getCommandIdentifier();

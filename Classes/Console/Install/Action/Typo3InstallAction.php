@@ -108,6 +108,10 @@ class Typo3InstallAction implements InstallActionInterface
         $arguments = array_merge($arguments, $options);
         $actionResult = $this->commandDispatcher->executeCommand('install:' . $actionName, $arguments);
         $response = @unserialize($actionResult);
+        if (is_bool($response)) {
+            var_dump($actionResult);
+            exit;
+        }
         if ($response === false && $actionName === 'defaultconfiguration') {
             // This action terminates with exit, (trying to initiate a HTTP redirect)
             // Therefore we gracefully create a valid response here
