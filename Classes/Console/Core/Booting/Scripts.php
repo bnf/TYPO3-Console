@@ -137,7 +137,9 @@ class Scripts
         $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         $coreCache = $cacheManager->getCache('cache_core');
         Bootstrap::loadBaseTca(true, $coreCache);
-        Bootstrap::checkEncryptionKey();
+        \Closure::bind(function() {
+            Bootstrap::checkEncryptionKey();
+        }, null, Bootstrap::class)();
     }
 
     /**
