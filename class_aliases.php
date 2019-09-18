@@ -1,12 +1,67 @@
 <?php
 
 namespace compat {
-	interface CommandControllerInterface {
+
+	interface ControllerInterface {
+	}
+    if (!interface_exists(\TYPO3\CMS\Extbase\Mvc\Controller\ControllerInterface::class)) {
+	    class_alias(ControllerInterface::class, \TYPO3\CMS\Extbase\Mvc\Controller\ControllerInterface::class, true);
+    }
+
+	interface CommandControllerInterface extends \TYPO3\CMS\Extbase\Mvc\Controller\ControllerInterface {
 	}
 
 	if (!interface_exists(\TYPO3\CMS\Extbase\Mvc\Controller\CommandControllerInterface::class)) {
 	    class_alias(CommandControllerInterface::class, \TYPO3\CMS\Extbase\Mvc\Controller\CommandControllerInterface::class, true);
 	}
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Mvc\Cli\CommandArgumentDefiniton::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Mvc\Cli\CommandArgumentDefinition::class,
+            \TYPO3\CMS\Extbase\Mvc\Cli\CommandArgumentDefiniton::class,
+            true
+        );
+    }
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Mvc\Cli\Command::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Mvc\Cli\Command::class,
+            \TYPO3\CMS\Extbase\Mvc\Cli\Command::class,
+            true
+        );
+    }
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Mvc\Cli\Request::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Mvc\Cli\Request::class,
+            \TYPO3\CMS\Extbase\Mvc\Cli\Request::class,
+            true
+        );
+    }
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Mvc\Cli\RequestBuilder::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Mvc\Cli\RequestBuilder::class,
+            \TYPO3\CMS\Extbase\Mvc\Cli\RequestBuilder::class,
+            true
+        );
+    }
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Mvc\Cli\Response::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Mvc\Cli\Response::class,
+            \TYPO3\CMS\Extbase\Mvc\Cli\Response::class,
+            true
+        );
+    }
+
+    if (!class_exists(\TYPO3\CMS\Extbase\Reflection\DocCommentParser::class)) {
+        class_alias(
+            \Helhum\Typo3Console\Extbase\Reflection\DocCommentParser::class,
+            \TYPO3\CMS\Extbase\Reflection\DocCommentParser::class,
+            true
+        );
+    }
 
 	abstract class AbstractUpdate implements \TYPO3\CMS\Install\Updates\UpgradeWizardInterface, \TYPO3\CMS\Install\Updates\ChattyInterface
 	{
