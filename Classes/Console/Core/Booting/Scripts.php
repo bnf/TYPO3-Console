@@ -121,7 +121,9 @@ class Scripts
         IconRegistry::setCache($assetsCache);
             PageRenderer::setCache($assetsCache);
             Bootstrap::loadTypo3LoadedExtAndExtLocalconf(true, $coreCache);
-            Bootstrap::setFinalCachingFrameworkCacheConfiguration($cacheManager);
+            if (is_callable([Bootstrap::class, 'setFinalCachingFrameworkCacheConfiguration'])) {
+                Bootstrap::setFinalCachingFrameworkCacheConfiguration($cacheManager);
+            }
             Bootstrap::unsetReservedGlobalVariables();
 
             //        CompatibilityScripts::initializeExtensionConfiguration($bootstrap);
