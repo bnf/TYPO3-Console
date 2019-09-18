@@ -112,11 +112,19 @@ class Kernel
             AnnotationRegistry::registerLoader('class_exists');
 //            $this->runLevel = new RunLevel($this->bootstrap);
             Scripts::baseSetup();
-            $this->container = Bootstrap::init(
+
+            $container = Bootstrap::init(
                 $this->classLoader->getTypo3ClassLoader(),
-                true,
-                false
+                true
             );
+            // Init symfony DI in TYPO3 v10
+            if (class_exists(\TYPO3\CMS\Install\Service\LateBootService::class)) {
+                $lateBootService = $container->get(\TYPO3\CMS\Install\Service\LateBootService::class);
+                $this->container = $lateBootService->getContainer();
+                $lateBootService->makeCurrent($this->container);
+            } else {
+                $this->container = $container;
+            }
             $this->initialized = true;
         }
         if ($runLevel !== null) {
