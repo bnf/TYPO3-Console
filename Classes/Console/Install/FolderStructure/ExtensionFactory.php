@@ -87,7 +87,9 @@ class ExtensionFactory extends DefaultFactory
     {
         $structureBase = [];
         foreach ($packages as $package) {
-            $extensionConfiguration = $this->packageManager->getExtensionEmConf($package->getPackagePath());
+            $extensionConfiguration = \Closure::bind(function() use ($package) {
+                return $this->getExtensionEmConf($package->getPackagePath());
+            }, $this->packageManager, get_class($this->packageManager))();
 
             if (isset($extensionConfiguration['uploadfolder']) && (bool)$extensionConfiguration['uploadfolder']) {
                 $structureBase[] = $this->getExtensionUploadDirectory($package->getPackageKey());
